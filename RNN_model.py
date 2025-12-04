@@ -350,6 +350,7 @@ def save_predictions(predictions, labels, texts, probabilities, processor, filen
     for col_name, col_values in prob_cols.items():  # 遍历概率列字典
         results_df[col_name] = col_values  # 添加新列
     
+    
     results_df.to_csv(filename, index=False, encoding='utf-8')
     print(f"\n预测结果已保存到: {filename}")
     return results_df

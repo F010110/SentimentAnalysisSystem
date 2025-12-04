@@ -9,13 +9,13 @@ def main():
     """主函数"""
     
     
-    EMBED_DIM = 128         # 词嵌入维度：每个单词用128维向量表示
-    HIDDEN_DIM = 64         # RNN隐藏层维度：隐藏状态向量的长度
+    EMBED_DIM = 300         # 词嵌入维度：每个单词用300维向量表示
+    HIDDEN_DIM = 256         # RNN隐藏层维度：隐藏状态向量的长度
     OUTPUT_DIM = 4          # 输出维度：对应4个情感类别: Irrelevant, Negative, Neutral, Positive
-    N_LAYERS = 2            # RNN层数：堆叠2层GRU
-    DROPOUT = 0.3           # 丢弃率 
-    BATCH_SIZE = 32         # 批处理大小：每次训练32个样本
-    LEARNING_RATE = 0.001   # 学习率：Adam优化器的学习率
+    N_LAYERS = 3            # RNN层数：堆叠3层GRU
+    DROPOUT = 0.5           # 丢弃率 
+    BATCH_SIZE = 64         # 批处理大小：每次训练64个样本
+    LEARNING_RATE = 0.0005   # 学习率：Adam优化器的学习率
     
     
     TRAIN_PATH = os.path.join('dataset', 'twitter_training_cleaned.csv')
@@ -100,6 +100,8 @@ def main():
 
     # 8. 保存预测结果
     results_df = save_predictions(predictions, true_labels, texts, probabilities, processor)
+
+
     # save_predictions函数：
     # - 将预测结果保存为CSV文件
     # - 返回包含所有结果的DataFrame
