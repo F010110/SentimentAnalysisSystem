@@ -45,8 +45,9 @@ class SentimentRNN(nn.Module):
 
         
         
-        self.fc = nn.Linear(hidden_dim * 2, output_dim)  
-        # 全连接层，因为双向GRU，所以隐藏层维度是hidden_dim * 2
+        self.fc = nn.Linear(hidden_dim * 6, output_dim)  
+        # 全连接层，输入维度为 hidden_dim * 6
+        # 包含: 双向隐藏状态(hidden_dim*2) + 平均池化(hidden_dim*2) + 最大池化(hidden_dim*2)
 
         self.dropout = nn.Dropout(dropout)
         
@@ -85,9 +86,21 @@ class SentimentRNN(nn.Module):
         hidden_backward = hidden[-1, :, :]  # 后向最后层
         # 取最后两个隐藏状态（因为双向，所以前向和后向各最后一个），拼接后作为全连接层的输入
         hidden_concat = torch.cat((hidden_forward, hidden_backward), dim=1)
+
+        # 当前方案：只用最后隐藏状态
+        # 新方案：结合所有时间步的注意力或池化
+    
+        # 选项1：平均池化
+        avg_pool = torch.mean(rnn_output, dim=1)
+    
+        # 选项2：最大池化
+        max_pool, _ = torch.max(rnn_output, dim=1)
+
+        # 拼接所有特征
+        combined = torch.cat([hidden_concat, avg_pool, max_pool], dim=1)
         
         # 全连接层
-        output = self.fc(self.dropout(hidden_concat))
+        output = self.fc(self.dropout(combined))
         
         return output
 

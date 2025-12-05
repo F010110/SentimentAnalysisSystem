@@ -4,19 +4,21 @@ from RNN_model import SentimentRNN, train_model, evaluate_model, plot_training_h
 from text_process import SentimentDataProcessor, create_data_loaders
 import torch.optim as optim
 import os
+from sklearn.utils.class_weight import compute_class_weight
+import numpy as np
 
 def main():
     """主函数"""
     
     
-    EMBED_DIM = 300         # 词嵌入维度：每个单词用300维向量表示
-    HIDDEN_DIM = 256         # RNN隐藏层维度：隐藏状态向量的长度
-    OUTPUT_DIM = 4          # 输出维度：对应4个情感类别: Irrelevant, Negative, Neutral, Positive
-    N_LAYERS = 3            # RNN层数：堆叠3层GRU
-    DROPOUT = 0.5           # 丢弃率 
-    BATCH_SIZE = 64         # 批处理大小：每次训练64个样本
+    EMBED_DIM = 200          # 词嵌入维度：每个单词用EMBED_DIM维向量表示
+    HIDDEN_DIM = 128         # RNN隐藏层维度：隐藏状态向量的长度
+    OUTPUT_DIM = 4           # 输出维度：对应4个情感类别: Irrelevant, Negative, Neutral, Positive
+    N_LAYERS = 4             # GRU层数
+    DROPOUT = 0.6            # 丢弃率 
+    BATCH_SIZE = 64          # 批处理大小：每次训练64个样本
     LEARNING_RATE = 0.0005   # 学习率：Adam优化器的学习率
-    
+    EPOCHS = 10              # 训练轮数：模型将训练10个周期
     
     TRAIN_PATH = os.path.join('dataset', 'twitter_training_cleaned.csv')
     VAL_PATH = os.path.join('dataset', 'twitter_validation_cleaned.csv')
@@ -68,18 +70,35 @@ def main():
 
     
     # 4. 定义优化器和损失函数
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
-    criterion = nn.CrossEntropyLoss()
+    # optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
+    
+    optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)  # AdamW通常更好
+    
     # Adam优化器：
     # - model.parameters()：模型的所有可训练参数
     # - lr=0.001：学习率
     # - weight_decay=1e-4：L2正则化系数，防止过拟合
+
+
+    
+
+    # 计算类别权重（解决潜在的不平衡问题）
+    classes = np.unique(train_df['attitude'])
+    weights = compute_class_weight(
+    class_weight='balanced', 
+    classes=classes, 
+    y=train_df['attitude']
+)
+    class_weights = torch.tensor(weights, dtype=torch.float).to(device)
+
+    criterion = nn.CrossEntropyLoss(weight=class_weights)  # 添加权重
+    print(f"类别权重: {weights}")
     
     
     
     # 5. 训练模型
     print("\n步骤4: 训练模型")
-    history = train_model(model, train_loader, optimizer, criterion, epochs=15)
+    history = train_model(model, train_loader, optimizer, criterion, epochs=EPOCHS)
     # train_model函数：
     # - model：要训练的模型
     # - train_loader：训练数据加载器
