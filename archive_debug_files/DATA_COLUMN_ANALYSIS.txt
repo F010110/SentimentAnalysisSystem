@@ -1,0 +1,103 @@
+数据列对比分析
+=====================================================
+
+【当前使用的数据】
+
+✓ 确认：BERT_main_aggressive.py 使用的是 `processed_text` 列
+
+【三列对比】
+
+样本 1:
+原始 text:      "im getting on borderlands and i will murder you all ,"
+cleaned_text:   "im getting on borderlands and i will murder you all"
+processed_text: "im getting borderlands murder"  ← 当前使用
+
+样本 2:
+原始 text:      "I am coming to the borders and I will kill you all,"
+cleaned_text:   "i am coming to the borders and i will kill you all"
+processed_text: "coming borders kill"  ← 当前使用
+
+样本 3:
+原始 text:      "im getting on borderlands and i will kill you all,"
+cleaned_text:   "im getting on borderlands and i will kill you all"
+processed_text: "im getting borderlands kill"  ← 当前使用
+
+【分析】
+
+processed_text 列经过了激进的预处理：
+- ✓ 移除停用词 (am, on, and, i, will, you, all 等)
+- ✓ 可能进行了词干提取
+- ✓ 保留了关键词
+
+优点:
++ 减少了噪音
++ 保留了核心语义词汇
++ 文本更短，训练更快
+
+缺点:
+- 丢失了上下文信息 (am, will 等助动词)
+- 丢失了语法结构
+- 对于 BERT 这样的预训练模型，可能不是最优选择
+
+【问题所在】⚠️
+
+BERT 模型是基于**完整句子**预训练的，它依赖：
+1. 完整的语法结构
+2. 停用词提供的上下文
+3. 词序和句子结构
+
+使用过度处理的 `processed_text` 可能导致：
+- BERT 无法充分利用其预训练知识
+- 上下文信息丢失
+- 准确率下降
+
+【建议改进】
+
+方案 A: 使用 cleaned_text (推荐)
+------------------------------------
+优点:
+✓ 保留完整句子结构
+✓ BERT 可以充分利用预训练知识
+✓ 更符合 BERT 的使用方式
+
+预期提升: +10-20% 准确率
+
+方案 B: 使用原始 text
+------------------------------------
+优点:
+✓ 完全原始数据
+✓ 保留所有信息
+
+缺点:
+- 包含标点、大小写不一致
+- 可能有噪音
+
+【立即测试】
+
+修改 BERT_main_aggressive.py:
+
+在 SentimentDataset.__init__() 中:
+```python
+# 改为使用 cleaned_text
+self.texts = dataframe['cleaned_text'].tolist()  # 改这里
+```
+
+或者在加载数据后添加:
+```python
+df_train['processed_text'] = df_train['cleaned_text']
+df_val['processed_text'] = df_val['cleaned_text']
+```
+
+【对比实验】
+
+建议做两次训练对比:
+1. 使用 processed_text (当前): 预期 50-65%
+2. 使用 cleaned_text (推荐): 预期 70-80%
+
+【结论】
+
+✓ 确认使用的是 processed_text 列
+⚠️ 这可能是准确率只有 50% 的主要原因
+✅ 建议改用 cleaned_text 列
+
+立即修改并重新训练，应该能看到显著提升！

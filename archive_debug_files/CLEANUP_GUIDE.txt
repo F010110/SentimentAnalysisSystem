@@ -1,0 +1,153 @@
+项目文件整理建议
+=====================================================
+
+【当前文件状态】
+
+核心训练文件 (必须保留):
+✓ BERT_main_aggressive.py      - 激进修复训练脚本 (推荐使用)
+✓ BERT_model_aggressive.py     - 激进修复模型架构
+✓ BERT_config.py               - 配置文件
+✓ text_process.py              - 数据处理工具
+
+原始文件 (可选保留):
+○ BERT_main.py                 - 原始训练脚本 (有Loss=1.38问题)
+○ BERT_model.py                - 原始模型 (有冻结层问题)
+○ RNN_main.py                  - RNN模型训练
+○ RNN_model.py                 - RNN模型定义
+
+工具脚本 (推荐保留):
+✓ quick_test.py                - 快速环境测试
+✓ diagnose_bert.py             - 模型诊断工具
+○ download_models.py           - 模型下载脚本 (已用过可删)
+○ check_model.py               - 模型文件检查 (已用过可删)
+
+数据文件 (必须保留):
+✓ data_cleaning.ipynb          - 数据清洗笔记本
+✓ baseline_model.ipynb         - 基线模型笔记本
+✓ dataset/                     - 数据集文件夹
+✓ models/                      - 预训练BERT模型
+
+文档 (必须保留):
+✓ README.md                    - 项目说明
+✓ LICENSE                      - MIT许可证
+✓ AGGRESSIVE_FIX_GUIDE.md      - 激进修复技术指南
+
+临时文件 (可以删除):
+✗ log.txt                      - 训练日志 (临时)
+✗ FIX_SUMMARY.txt              - 修复摘要 (临时)
+✗ __pycache__/                 - Python缓存 (自动生成)
+
+=====================================================
+
+【手动整理步骤】
+
+方式1: 使用自动脚本
+-------------------
+python cleanup_project.py
+
+脚本会自动:
+- 将临时文件移动到 backup_old_files/
+- 询问是否删除 __pycache__
+- 保留所有重要文件
+
+
+方式2: 手动删除
+-------------------
+在PowerShell中执行:
+
+# 删除临时文件
+Remove-Item log.txt
+Remove-Item FIX_SUMMARY.txt
+
+# 删除Python缓存 (可选)
+Remove-Item -Recurse -Force __pycache__
+
+# 删除旧的训练模型 (如果有)
+Remove-Item -Recurse -Force saved_model
+
+
+方式3: 创建干净的项目结构
+-------------------
+推荐的最终目录结构:
+
+SentimentAnalysisSystem/
+├── dataset/                    # 数据集
+│   ├── twitter_training_cleaned.csv
+│   └── twitter_validation_cleaned.csv
+├── models/                     # 预训练模型
+│   └── bert-base-uncased/
+├── saved_model_aggressive/     # 训练后的模型保存位置
+├── BERT_main_aggressive.py     # 主训练脚本
+├── BERT_model_aggressive.py    # 模型架构
+├── BERT_config.py              # 配置
+├── text_process.py             # 数据处理
+├── quick_test.py               # 测试脚本
+├── diagnose_bert.py            # 诊断脚本
+├── README.md                   # 文档
+├── LICENSE                     # 许可
+└── AGGRESSIVE_FIX_GUIDE.md     # 技术指南
+
+=====================================================
+
+【可选：归档旧文件】
+
+如果不想删除原始文件，可以创建归档文件夹:
+
+# 创建归档文件夹
+New-Item -ItemType Directory -Path archive
+
+# 移动旧文件
+Move-Item BERT_main.py archive/
+Move-Item BERT_model.py archive/
+Move-Item RNN_main.py archive/
+Move-Item RNN_model.py archive/
+Move-Item check_model.py archive/
+Move-Item download_models.py archive/
+
+=====================================================
+
+【推荐操作】
+
+最简单的清理 (3条命令):
+
+1. 删除临时文件:
+   Remove-Item log.txt, FIX_SUMMARY.txt
+
+2. 删除Python缓存:
+   Remove-Item -Recurse -Force __pycache__
+
+3. (可选) 删除已用过的工具:
+   Remove-Item check_model.py
+
+完成！现在项目结构清爽多了。
+
+=====================================================
+
+需要保留的最小文件集 (如果磁盘空间紧张):
+
+必须保留:
+- BERT_main_aggressive.py
+- BERT_model_aggressive.py
+- BERT_config.py
+- text_process.py
+- dataset/
+- models/
+- README.md
+
+可选保留 (推荐):
+- quick_test.py (测试环境)
+- diagnose_bert.py (诊断工具)
+- AGGRESSIVE_FIX_GUIDE.md (技术文档)
+
+可以删除:
+- log.txt
+- FIX_SUMMARY.txt
+- check_model.py
+- download_models.py (如果模型已下载)
+- __pycache__/
+- .git/ (如果不需要版本控制)
+
+数据文件夹大小估算:
+- models/bert-base-uncased/: ~420 MB
+- dataset/: ~20 MB
+- 其他Python文件: ~0.5 MB
